@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,107 +19,80 @@ import android.widget.Toast;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 
-public class MainActivity extends AppCompatActivity {
+public class FolderActivity extends AppCompatActivity {
 
-    String basePath;
-    TextView textView;
+    String path;
+    TextView textViewPath;
     private LinearLayout mMainLayout;
     FloatingActionButton mActionButton;
-
-    public enum fileType {
-        FOLDER,
-        FILE
-    }
-
-    private Integer[] mThumbIds = {
-            R.drawable.ic_folder,
-            R.drawable.ic_file,
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_folder);
 
+        try {
+            path = getIntent().getExtras().getString("path");
+        } catch (Exception ex) {
+        }
 
-        basePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "";
-        Log.d("Files", "path:" + basePath);
+        textViewPath = findViewById(R.id.path);
         mMainLayout = (LinearLayout) findViewById(R.id.layoutMainActivity);
         mActionButton = (FloatingActionButton) findViewById(R.id.floatingActionButton);
-        checkFolder();
-        SetListeners();
-    }
 
-    private void SetListeners() {
+        if (path != null) {
+            textViewPath.setText(path);
+        }
+
         mActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, CreateNoteActivity.class);
-                intent.putExtra("path", FileUtils.getInstance().getBasePath());
+                Intent intent = new Intent(FolderActivity.this, CreateNoteActivity.class);
+                intent.putExtra("path", path);
                 startActivity(intent);
             }
         });
-    }
 
+    }
 
     private File[] getNoteFolders() {
         mMainLayout.removeAllViews();
-        File[] files = FileUtils.getInstance().getFileFromDirectoryByPath(basePath + "/TestFolder");
+
+        File directory = new File(path);
+        File[] files = directory.listFiles();
         if (files == null)
             return new File[0];
 
         for (int i = 0; i < files.length; i++) {
             if (files[i].isDirectory())
-                AddLessonViewElementToView(files[i], fileType.FOLDER);
+                AddLessonViewElementToView(files[i], Application.FileType.FOLDER);
             else
-                AddLessonViewElementToView(files[i], fileType.FILE);
+                AddLessonViewElementToView(files[i], Application.FileType.FILE);
         }
         return files;
     }
 
-    public void checkFolder() {
-        File folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "", "TestFolder");
-        if (folder.exists())
-            return;
-
-        Toast.makeText(this, "Creating dir with test file", Toast.LENGTH_SHORT).show();
-        folder.mkdirs();
-
-        try {
-            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/TestFolder", "testFile.txt");
-
-            FileOutputStream fos = new FileOutputStream(file);
-            String text = "test text";
-            fos.write(text.getBytes());
-            fos.close();
-            Toast.makeText(this, "Data saved", Toast.LENGTH_SHORT).show();
-        } catch (java.io.IOException e) {
-            Toast.makeText(this, "Unsuccessfully", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void AddLessonViewElementToView(File file, fileType type) {
+    private void AddLessonViewElementToView(File file, Application.FileType type) {
         View view1 = getLayoutInflater().inflate(R.layout.lessons_label, null);
         final TextView mainText = (TextView) view1.findViewById(R.id.main_text);
         final TextView dateModifiedLabel = (TextView) view1.findViewById(R.id.date_modified);
         final String noteType = type.toString();
         final String fileName = file.getName();
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM hh:mm");
-        String dateModified =  sdf.format(file.lastModified());
+        String dateModified = sdf.format(file.lastModified());
         dateModifiedLabel.setText(dateModified);
         mainText.setText(file.getName());
         ImageView imageView1 = (ImageView) view1.findViewById(R.id.imageView);
 
-        final fileType fileType = type;
+        final Application.FileType fileType = type;
         switch (type) {
             case FOLDER:
-                imageView1.setImageResource(mThumbIds[0]);
+                imageView1.setImageResource(Application.mThumbIds[0]);
                 break;
             case FILE:
-                imageView1.setImageResource(mThumbIds[1]);
+                imageView1.setImageResource(Application.mThumbIds[1]);
                 break;
         }
 
@@ -131,40 +103,38 @@ public class MainActivity extends AppCompatActivity {
                 switch (fileType) {
                     case FOLDER:
                         //Toast.makeText(MainActivity.this, "Click: " + mainText.getText().toString(), Toast.LENGTH_SHORT).show();
-                        Intent intent1 = new Intent(MainActivity.this, FolderActivity.class);
-                        intent1.putExtra("path", FileUtils.getInstance().getBasePath() + "/" + fileName);
+                        Intent intent1 = new Intent(FolderActivity.this, FolderActivity.class);
+                        intent1.putExtra("path", path + "/" + fileName);
                         startActivity(intent1);
                         break;
                     case FILE:
                         //Toast.makeText(MainActivity.this, "Click: " + mainText.getText().toString(), Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(MainActivity.this, BaseNoteActivity.class);
+                        Intent intent = new Intent(FolderActivity.this, BaseNoteActivity.class);
                         intent.putExtra("type", noteType);
                         intent.putExtra("fileName", fileName);
-                        intent.putExtra("filePath", FileUtils.getInstance().getBasePath() + "/" + fileName);
+                        intent.putExtra("filePath", path + "/" + fileName);
                         startActivity(intent);
                         break;
                 }
-
             }
         });
 
         view1.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(FolderActivity.this);
                 builder.setCancelable(false);
                 builder.setTitle("Delete note?");
                 builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        boolean res = FileUtils.getInstance().DeleteByPath(FileUtils.getInstance().getBasePath() + "/" + fileName);
+                        boolean res = FileUtils.getInstance().DeleteByPath(path + "/" + fileName);
                         if (res) {
-                            Toast.makeText(MainActivity.this, fileName + " deleted", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(FolderActivity.this, fileName + " deleted", Toast.LENGTH_SHORT).show();
                             getNoteFolders();
                         } else
-                            Toast.makeText(MainActivity.this, "Error!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(FolderActivity.this, "Error!", Toast.LENGTH_SHORT).show();
                     }
-
                 }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -174,10 +144,16 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-
         mMainLayout.addView(view1);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        File[] noteFolders = getNoteFolders();
+        if (noteFolders.length == 0)
+            Toast.makeText(this, "No notes", Toast.LENGTH_SHORT).show();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -192,11 +168,11 @@ public class MainActivity extends AppCompatActivity {
                 finish();
                 return true;
             case R.id.add_folder:
-                AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(FolderActivity.this);
                 alertDialog.setTitle("Folder name");
 //                alertDialog.setMessage("Enter Password");
 
-                final EditText input = new EditText(MainActivity.this);
+                final EditText input = new EditText(FolderActivity.this);
                 LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.MATCH_PARENT);
@@ -207,10 +183,9 @@ public class MainActivity extends AppCompatActivity {
                 alertDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        if(input.getText().toString().isEmpty())
+                        if (input.getText().toString().isEmpty())
                             return;
-                        FileUtils instance = FileUtils.getInstance();
-                        instance.createFolderByPath(instance.getBasePath() + "/" + input.getText());
+                        FileUtils.getInstance().createFolderByPath(path + "/" + input.getText());
                         getNoteFolders();
                     }
 
@@ -225,13 +200,4 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        File[] noteFolders = getNoteFolders();
-        if (noteFolders.length == 0)
-            Toast.makeText(this, "No notes", Toast.LENGTH_SHORT).show();
-    }
-
 }

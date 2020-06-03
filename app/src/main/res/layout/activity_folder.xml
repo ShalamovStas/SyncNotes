@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    tools:context=".MainActivity">
+    tools:context=".FolderActivity">
 
 
     <LinearLayout
@@ -14,15 +14,15 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-
-        <!--        <TextView-->
-        <!--        android:layout_width="wrap_content"-->
-        <!--        android:layout_height="wrap_content" -->
-        <!--        android:text="Source"-->
-        <!--        android:layout_gravity="center_horizontal"-->
-        <!--        android:textSize="30sp"/>-->
-
-
+        <TextView
+            android:id="@+id/path"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Path not specified"
+            android:gravity="center"
+            android:padding="10dp"
+            android:textSize="15sp" />
 
         <ScrollView
             android:id="@+id/scroll_view_level_1"
@@ -37,14 +37,14 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-<!--                <TextView-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:gravity="center_horizontal"-->
-<!--                    android:paddingTop="10dp"-->
-<!--                    android:paddingBottom="10dp"-->
-<!--                    android:text="Notes"-->
-<!--                    android:textSize="20sp" />-->
+                <!--                <TextView-->
+                <!--                    android:layout_width="match_parent"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:gravity="center_horizontal"-->
+                <!--                    android:paddingTop="10dp"-->
+                <!--                    android:paddingBottom="10dp"-->
+                <!--                    android:text="Notes"-->
+                <!--                    android:textSize="20sp" />-->
 
 
             </LinearLayout>
@@ -55,31 +55,17 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-
-
     </LinearLayout>
-
-<!--    <android.support.design.widget.FloatingActionButton-->
-<!--        android:id="@+id/floatingActionButton"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_alignParentBottom="true"-->
-<!--        android:layout_alignParentRight="true"-->
-<!--        android:layout_margin="16dp"-->
-<!--        android:clickable="true"-->
-<!--        android:src="@drawable/ic_file"-->
-<!--        app:backgroundTint="@color/colorPrimary" />-->
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floatingActionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:clickable="true"
+        android:layout_alignParentBottom="true"
         android:layout_margin="16dp"
-        app:srcCompat="@drawable/ic_plus"
-        app:backgroundTint="@color/colorActionBtn"/>
+        android:clickable="true"
+        app:backgroundTint="@color/colorActionBtn"
+        app:srcCompat="@drawable/ic_plus" />
 
 </RelativeLayout>
